@@ -32,15 +32,21 @@ int main(int argc, char** argv)
   QApplication application(argc,argv);
 
   QGLFormat glFormat(QGL::SampleBuffers);
+qDebug() << "Starting application";
 
  glFormat.setVersion( 3, 3 );
  glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
  glFormat.setSampleBuffers( true );
+qDebug() << "GLFormat set";
 
   QGLContext context(glFormat);
+  context.makeCurrent();
+  
+qDebug() << "context created";
 
   Viewer viewer(&context);
   viewer.setWindowTitle("multiSelect");
+qDebug() << "about to show window";
   viewer.show();
 
   qDebug() << QGLFormat::openGLVersionFlags();

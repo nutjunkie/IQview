@@ -25,10 +25,13 @@
 
 #include "QGLViewer/frame.h"
 
+class QGLContext;
+
+
 class Object
 {
    public :
-      Object();
+      Object(QGLContext*);
       ~Object();
       void draw() const;
       void setProgram(GLuint const program) { m_programID = program; }
@@ -39,6 +42,7 @@ class Object
       static const GLfloat s_vertexBufferData[9];
       GLuint m_vertexBuffer;
       GLuint m_programID;
+      QGLContext* m_context;
 };
 
 #endif // OBJECT_H_

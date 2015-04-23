@@ -15,3 +15,6 @@ TEMPLATE = subdirs
 
 SUBDIRS  = src/QGLViewer \
            src/Main \
+
+#SUBDIRS  = src/Main \
+           

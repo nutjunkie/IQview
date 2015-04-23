@@ -6,13 +6,13 @@
 ###############################################################################
 
 
-QMAKE_CXXFLAGS += -O2 -g -ggdb
+QMAKE_CXXFLAGS += -O0 -g -ggdb
 
 # Make much smaller libraries (and packages) by removing debugging informations
-QMAKE_CFLAGS_RELEASE -= -g
-QMAKE_CXXFLAGS_RELEASE -= -g
+#QMAKE_CFLAGS_RELEASE -= -g
+#QMAKE_CXXFLAGS_RELEASE -= -g
 
-CONFIG += no_keywords qt rtti
+CONFIG += no_keywords qt rtti debug
 QT     +=
 
 
@@ -42,3 +42,9 @@ app {
 MOC_DIR     = $$BUILD_DIR/moc
 UI_DIR      = $$BUILD_DIR/ui
 OBJECTS_DIR = $$BUILD_DIR/obj
+
+win32 {
+   LIBS += C:\MinGW\lib\libws2_32.a
+   LIBS += C:\MinGW\lib\libopengl32.a
+   LIBS += C:\MinGW\lib\libglu32.a
+}

@@ -5,6 +5,8 @@ include (../config.pri)
 CONFIG *= opengl warn_on thread 
 QT     *= xml opengl
 
+DEFINES += QGLVIEWER_STATIC
+
 HEADERS = \
       qglviewer.h \
 	  camera.h \

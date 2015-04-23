@@ -42,11 +42,14 @@
 Error : libQGLViewer requires a minimum Qt version of 4.0
 #endif
 
+
 // Win 32 DLL export macros
 #ifdef Q_OS_WIN32
 # ifndef M_PI
 #  define M_PI 3.14159265358979323846
 # endif
+
+#if 0
 # ifndef QGLVIEWER_STATIC
 #   ifdef CREATE_QGLVIEWER_DLL
 #     if QT_VERSION >= 0x040500
@@ -62,6 +65,8 @@ Error : libQGLViewer requires a minimum Qt version of 4.0
 #     endif
 #  endif
 # endif
+#endif
+
 # ifndef __MINGW32__
 #  pragma warning( disable : 4251 ) // DLL interface, needed with Visual 6
 #  pragma warning( disable : 4786 ) // identifier truncated to 255 in browser information (Visual 6).

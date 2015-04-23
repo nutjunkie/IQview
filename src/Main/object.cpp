@@ -23,6 +23,8 @@
 #include <qgl.h>
 #include "object.h"
 #include <QtDebug>
+#include <QGLFunctions>
+#include <QGLContext>
 
 using namespace qglviewer;
 
@@ -36,14 +38,15 @@ const GLfloat Object::s_vertexBufferData[] =
 };
 
   
-Object::Object() : m_programID(0)
+Object::Object(QGLContext* context) : m_programID(0), m_context(context)
 {
+   QGLFunctions f(m_context);
    // Generate 1 buffer, put the resulting identifier in m_vertexbuffer
-   glGenBuffers(1, &m_vertexBuffer);
+   f.glGenBuffers(1, &m_vertexBuffer);
    // The following commands will talk about our 'm_vertexbuffer' buffer
-   glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+   f.glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
    // Give our vertices to OpenGL.
-   glBufferData(GL_ARRAY_BUFFER, sizeof(s_vertexBufferData), s_vertexBufferData, GL_STATIC_DRAW);
+   f.glBufferData(GL_ARRAY_BUFFER, sizeof(s_vertexBufferData), s_vertexBufferData, GL_STATIC_DRAW);
 }
 
 
@@ -53,8 +56,8 @@ void Object::draw() const
   //glMultMatrixd(frame.matrix());
   //GLuint matrixLocation = glGetUniformLocation(m_programID, "MVP");
   //glUniformMatrix4fv(matrixLocation, 1, GL_FALSE, m);
-  drawTriangle();
-  //drawObject();
+  //drawTriangle();
+  drawObject();
   //glPopMatrix();
 }
 
@@ -69,10 +72,11 @@ void Object::drawObject() const
 
 void Object::drawTriangle() const
 {
+   QGLFunctions f(m_context);
    // 1rst attribute buffer : vertices
    //glEnableVertexAttribArray(0);
-   glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-   glVertexAttribPointer(
+   f.glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+   f.glVertexAttribPointer(
       0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
       3,        // size
       GL_FLOAT, // type

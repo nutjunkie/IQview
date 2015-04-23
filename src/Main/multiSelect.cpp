@@ -25,10 +25,10 @@
 #include <QGLViewer/manipulatedFrame.h>
 #include <QMouseEvent>
 #include <QtDebug>
-#include "glm/glm.hpp"
+#include <QGLFunctions>
 
 
-GLuint LoadShaders(const char * vertex_file_path, const char * geometry_file_path,
+GLuint LoadShaders(QGLContext*, const char * vertex_file_path, const char * geometry_file_path,
    const char * fragment_file_path);
 
 
@@ -42,6 +42,8 @@ Viewer::Viewer(QGLContext* context) : QGLViewer(context)
 
 void Viewer::init()
 {
+  QGLFunctions f(context());
+
   // A ManipulatedFrameSetConstraint will apply displacements to the selection
   setManipulatedFrame(new ManipulatedFrame());
   manipulatedFrame()->setConstraint(new ManipulatedFrameSetConstraint());
@@ -50,7 +52,7 @@ void Viewer::init()
 	const int nb = 4;
 	for (int i=-nb; i<=nb; ++i) {
 		for (int j=-nb; j<=nb; ++j) {
-			Object* o = new Object();
+			Object* o = new Object(context());
 			o->frame.setPosition(Vec(i/float(nb), j/float(nb), 0.0));
             o->setProgram(m_programID);
 			objects_.append(o);
@@ -61,57 +63,51 @@ void Viewer::init()
   // Used to display semi-transparent relection rectangle
   glBlendFunc(GL_ONE, GL_ONE);
 
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
 
-  m_programID = LoadShaders( "/Users/agilbert/Development/IQview/shader.vert", 
-                             "/Users/agilbert/Development/IQview/shader.geom",
-                             "/Users/agilbert/Development/IQview/shader.frag" );
-  m_vertexLocation = glGetAttribLocation(m_programID, "vertexPosition_modelspace");
-  //qDebug() << "matrix location" << glGetUniformLocation(m_programID, "MVP");
+  //GLuint vao;
+  //f->glGenVertexArrays(1, &vao);
+  //f->glBindVertexArray(vao);
 
-      camera()->setPosition( Vec(0.0f, 0.0f, 3.0f) );
-      camera()->setOrientation(0.0f, 0.0f);
-      camera()->lookAt( Vec(0.0f, 0.0f, 0.0f) );
+/*
+  m_programID = LoadShaders( context(), 
+                             "C:/Users/agilbert/Development/IQview/shader.vert", 
+                             "C:/Users/agilbert/Development/IQview/shader.geom",
+                             "C:/Users/agilbert/Development/IQview/shader.frag" );
 
-  help();
+*/
+
+  m_programID = LoadShaders( context(), 
+                             "C:/Users/agilbert/Development/IQview/Cel.vert", 
+                             "C:/Users/agilbert/Development/IQview/shader.geom",
+                             "C:/Users/agilbert/Development/IQview/Cel.frag" );
+  m_vertexLocation = f.glGetAttribLocation(m_programID, "vertexPosition_modelspace");
+  qDebug() << "program ID" << m_programID;
+  qDebug() << "matrix location" << f.glGetUniformLocation(m_programID, "MVP");
+
+  camera()->setPosition( Vec(0.0f, 0.0f, 3.0f) );
+  camera()->setOrientation(0.0f, 0.0f);
+  camera()->lookAt( Vec(0.0f, 0.0f, 0.0f) );
 }
-
-QString Viewer::helpString() const
-{
-  QString text("<h2>m u l t i S e l e c t </h2>");
-  text += "This example illustrates an application of the <code>select()</code> function that ";
-  text += "enables the selection of several objects.<br><br>";
-  text += "Object selection is preformed using the left mouse button. Press <b>Shift</b> to add objects ";
-  text += "to the selection, and <b>Alt</b> to remove objects from the selection.<br><br>";
-  text += "Individual objects (click on them) as well as rectangular regions (click and drag mouse) can be selected. ";
-  text += "To do this, the selection region size is modified and the <code>endSelection()</code> function ";
-  text += "has been overloaded so that <i>all</i> the objects of the region are taken into account ";
-  text += "(the default implementation only selects the closest object).<br><br>";
-  text += "The selected objects can then be manipulated by pressing the <b>Control</b> key. ";
-  text += "Other set operations (parameter edition, deletion...) can also easily be applied to the selected objects.";
-  return text;
-}
-
 
 //  D r a w i n g   f u n c t i o n
 
 void Viewer::draw()
 {
-   glUseProgram(m_programID);
-   glEnableVertexAttribArray(m_vertexLocation);
+  makeCurrent();
+  QGLFunctions f(context());
+   f.glUseProgram(m_programID);
+   f.glEnableVertexAttribArray(m_vertexLocation);
 
 
-   GLuint mvpLocation = glGetUniformLocation(m_programID, "MVP");
-   GLuint modelLocation = glGetUniformLocation(m_programID, "modelMatrix");
+   GLuint mvpLocation = f.glGetUniformLocation(m_programID, "MVP");
+   GLuint modelLocation = f.glGetUniformLocation(m_programID, "modelMatrix");
    qDebug() << "matrix locations" << mvpLocation <<  modelLocation ;
 
    GLfloat mvp[16];
    GLfloat m[16];
 
    camera()->getModelViewProjectionMatrix(mvp);
-   glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, mvp);
+   f.glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, mvp);
   
    //for (int j = 0; j < 4; ++j) { qDebug() << m[4*j]   << " " << m[4*j+1] << " " 
    //                                       << m[4*j+2] << " " << m[4*j+3]; }
@@ -120,7 +116,7 @@ void Viewer::draw()
 
 
       for (int j = 0; j < 16; ++j) { m[j] = GLfloat(objects_.at(i)->frame.matrix()[j]); }
-      glUniformMatrix4fv(modelLocation, 1, GL_FALSE, m);
+      f.glUniformMatrix4fv(modelLocation, 1, GL_FALSE, m);
 
    //for (int j = 0; j < 4; ++j) { qDebug() << m[4*j]   << " " << m[4*j+1] << " " 
    //                                       << m[4*j+2] << " " << m[4*j+3]; }
@@ -149,9 +145,9 @@ void Viewer::draw()
   if (selectionMode_ != NONE)
 	drawSelectionRectangle();
 */
-  glDisableVertexAttribArray(m_vertexLocation);
+  f.glDisableVertexAttribArray(m_vertexLocation);
 
-  swapBuffers();
+ // swapBuffers();
 }
 
 
@@ -299,3 +295,23 @@ void Viewer::drawSelectionRectangle() const
   glEnable(GL_LIGHTING);
   stopScreenCoordinatesSystem();
 }
+
+
+
+QString Viewer::helpString() const
+{
+  QString text("<h2>m u l t i S e l e c t </h2>");
+  text += "This example illustrates an application of the <code>select()</code> function that ";
+  text += "enables the selection of several objects.<br><br>";
+  text += "Object selection is preformed using the left mouse button. Press <b>Shift</b> to add objects ";
+  text += "to the selection, and <b>Alt</b> to remove objects from the selection.<br><br>";
+  text += "Individual objects (click on them) as well as rectangular regions (click and drag mouse) can be selected. ";
+  text += "To do this, the selection region size is modified and the <code>endSelection()</code> function ";
+  text += "has been overloaded so that <i>all</i> the objects of the region are taken into account ";
+  text += "(the default implementation only selects the closest object).<br><br>";
+  text += "The selected objects can then be manipulated by pressing the <b>Control</b> key. ";
+  text += "Other set operations (parameter edition, deletion...) can also easily be applied to the selected objects.";
+  return text;
+}
+
+
